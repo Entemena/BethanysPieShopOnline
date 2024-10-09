@@ -9,8 +9,8 @@ builder.Services.AddTransient       // A new instance every time
 builder.Services.AddSingleton       // Creates one instance that is kept alive
 */
 
-builder.Services.AddScoped<ICategoryRepository, MockCategoryRepository>();
-builder.Services.AddScoped<IPieRepository, MockPieRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IPieRepository, PieRepository>();
 
 
 builder.Services.AddDbContext<BethanysPieShopDbContext>(options => {
