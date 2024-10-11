@@ -1,10 +1,12 @@
-﻿namespace BethanysPieShopOnline.ViewModels
+﻿using BethanysPieShopOnline.Models;
+
+namespace BethanysPieShopOnline.ViewModels
 {
     public class HomeViewModel
     {
-        public IEnumerable<PieListViewModel> PiesOfTheWeek { get; }
+        public IEnumerable<Pie> PiesOfTheWeek { get; }
 
-        public HomeViewModel(IEnumerable<PieListViewModel> piesOfTheWeek)
+        public HomeViewModel(IEnumerable<Pie> piesOfTheWeek)
         {
             PiesOfTheWeek = piesOfTheWeek;
         }

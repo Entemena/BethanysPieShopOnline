@@ -1,4 +1,5 @@
 ﻿using BethanysPieShopOnline.Models;
+using BethanysPieShopOnline.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BethanysPieShopOnline.Controllers
@@ -14,7 +15,9 @@ namespace BethanysPieShopOnline.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var piesOfTheWeek = _pieRepository.PiesOfTheWeek;
+            var homeViewModel = new HomeViewModel(piesOfTheWeek);
+            return View(homeViewModel);
         }
     }
 }
