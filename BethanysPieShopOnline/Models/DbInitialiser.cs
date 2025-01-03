@@ -1,6 +1,6 @@
 ﻿using BethanysPieShopOnline.Models;
 
-namespace BethanysPieShop.Models
+namespace BethanysPieShopOnline.Models
 {
     public static class DbInitialiser
     {
