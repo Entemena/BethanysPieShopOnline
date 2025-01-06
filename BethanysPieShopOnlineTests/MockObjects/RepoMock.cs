@@ -10,6 +10,10 @@ namespace BethanysPieShopOnlineTests.Mocks
 {
     public class RepositoryMocks
     {
+        //public static Mock<ShoppingCart> GetShoppingCart()
+        //{ }
+        //public static Mock<OrderRepository> GetOrderRepository()
+        //{ }
         public static Mock<IPieRepository> GetPieRepository()
         {
             var pies = new List<Pie>
