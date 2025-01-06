@@ -32,19 +32,10 @@ namespace BethanysPieShopOnlineTests.Controllers
         public void Checkout_ValidOrder_RedirectsToOrderComplete()
         {
             // Arrange
-            var cartItems = new List<ShoppingCartItem>
-    {
-        new ShoppingCartItem { Pie = new Pie { PieId = 1, Name = "Apple Pie", Price = 10.99M }, Amount = 2 }
-    };
+            var mockShoppingCart = RepositoryMocks.GetShoppingCart();
+            var mockOrderRepository = RepositoryMocks.GetOrderRepository();
 
-            // Mock GetShoppingCartItems
-            _mockShoppingCart.Setup(c => c.GetShoppingCartItems()).Returns(cartItems);
-
-            // Mock ShoppingCartItems property
-            _mockShoppingCart.SetupProperty(c => c.ShoppingCartItems, cartItems);
-
-            // Mock GetShoppingCartTotal
-            _mockShoppingCart.Setup(c => c.GetShoppingCartTotal()).Returns(21.98M);
+            var orderController = new OrderController(mockShoppingCart.Object, mockOrderRepository.Object);
 
             var order = new Order
             {
@@ -57,29 +48,29 @@ namespace BethanysPieShopOnlineTests.Controllers
                 Country = "Test Country",
                 PhoneNumber = "1234567890",
                 EmailAddress = "john.doe@example.com",
-                OrderTotal = 21.98M,
-                OrderPlaced = DateTime.Now
+                OrderTotal = mockShoppingCart.Object.GetShoppingCartTotal()
             };
 
             // Act
-            var result = _orderController.Checkout(order);
+            var result = orderController.Checkout(order);
 
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("CheckoutComplete", redirectResult.ActionName); // Updated to "CheckoutComplete"
-            _mockOrderRepository.Verify(r => r.CreateOrder(It.IsAny<Order>()), Times.Once);
+            Assert.Equal("CheckoutComplete", redirectResult.ActionName);
+            mockOrderRepository.Verify(repo => repo.CreateOrder(It.IsAny<Order>()), Times.Once);
         }
-
 
         [Fact]
         public void Checkout_EmptyCart_ReturnsViewWithError()
         {
-            // Arrange: Ensure the shopping cart has no items (empty)
-            var cartItems = new List<ShoppingCartItem>();
+            // Arrange: Mock the shopping cart with no items
+            var mockShoppingCart = RepositoryMocks.GetShoppingCart();
+            mockShoppingCart.Setup(cart => cart.GetShoppingCartItems()).Returns(new List<ShoppingCartItem>());
+            mockShoppingCart.Setup(cart => cart.GetShoppingCartTotal()).Returns(0M);
+            mockShoppingCart.SetupProperty(cart => cart.ShoppingCartItems, new List<ShoppingCartItem>());
 
-            _mockShoppingCart.Setup(c => c.GetShoppingCartItems()).Returns(cartItems);
-            _mockShoppingCart.Setup(c => c.GetShoppingCartTotal()).Returns(0M);
-            _mockShoppingCart.SetupProperty(c => c.ShoppingCartItems, cartItems); // Mock ShoppingCartItems
+            var mockOrderRepository = RepositoryMocks.GetOrderRepository();
+            var orderController = new OrderController(mockShoppingCart.Object, mockOrderRepository.Object);
 
             var order = new Order
             {
@@ -95,35 +86,37 @@ namespace BethanysPieShopOnlineTests.Controllers
             };
 
             // Act
-            var result = _orderController.Checkout(order);
+            var result = orderController.Checkout(order);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.False(viewResult.ViewData.ModelState.IsValid);
         }
 
-
         [Fact]
         public void Checkout_NonEmptyCart_ProcessesOrderSuccessfully()
         {
-            // Arrange: Add an item to the shopping cart
+            // Arrange: Mock the shopping cart with items
+            var mockShoppingCart = RepositoryMocks.GetShoppingCart();
             var cartItems = new List<ShoppingCartItem>
+    {
+        new ShoppingCartItem
+        {
+            Pie = new Pie
             {
-                new ShoppingCartItem
-                {
-                    Pie = new Pie
-                    {
-                        PieId = 1,
-                        Name = "Apple Pie",
-                        Price = 10.99M
-                    },
-                    Amount = 2
-                }
-            };
+                PieId = 1,
+                Name = "Apple Pie",
+                Price = 10.99M
+            },
+            Amount = 2
+        }
+    };
+            mockShoppingCart.Setup(cart => cart.GetShoppingCartItems()).Returns(cartItems);
+            mockShoppingCart.Setup(cart => cart.GetShoppingCartTotal()).Returns(21.98M);
+            mockShoppingCart.SetupProperty(cart => cart.ShoppingCartItems, cartItems);
 
-            _mockShoppingCart.Setup(c => c.GetShoppingCartItems()).Returns(cartItems);
-            _mockShoppingCart.Setup(c => c.GetShoppingCartTotal()).Returns(21.98M);
-            _mockShoppingCart.SetupProperty(c => c.ShoppingCartItems, cartItems); // Mock ShoppingCartItems
+            var mockOrderRepository = RepositoryMocks.GetOrderRepository();
+            var orderController = new OrderController(mockShoppingCart.Object, mockOrderRepository.Object);
 
             var order = new Order
             {
@@ -140,12 +133,12 @@ namespace BethanysPieShopOnlineTests.Controllers
             };
 
             // Act
-            var result = _orderController.Checkout(order);
+            var result = orderController.Checkout(order);
 
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("CheckoutComplete", redirectResult.ActionName);
-            _mockOrderRepository.Verify(r => r.CreateOrder(It.IsAny<Order>()), Times.Once);
+            mockOrderRepository.Verify(repo => repo.CreateOrder(It.IsAny<Order>()), Times.Once);
         }
 
 

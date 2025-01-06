@@ -10,10 +10,57 @@ namespace BethanysPieShopOnlineTests.Mocks
 {
     public class RepositoryMocks
     {
-        //public static Mock<ShoppingCart> GetShoppingCart()
-        //{ }
-        //public static Mock<OrderRepository> GetOrderRepository()
-        //{ }
+        public static Mock<IShoppingCart> GetShoppingCart()
+        {
+            var shoppingCartItems = new List<ShoppingCartItem>
+        {
+            new ShoppingCartItem
+            {
+                Pie = new Pie
+                {
+                    PieId = 1,
+                    Name = "Apple Pie",
+                    Price = 10.99M,
+                    ShortDescription = "Our famous apple pies!",
+                    Category = Categories["Fruit pies"],
+                    InStock = true
+                },
+                Amount = 2
+            },
+            new ShoppingCartItem
+            {
+                Pie = new Pie
+                {
+                    PieId = 2,
+                    Name = "Blueberry Cheese Cake",
+                    Price = 18.95M,
+                    ShortDescription = "You'll love it!",
+                    Category = Categories["Cheese cakes"],
+                    InStock = true
+                },
+                Amount = 1
+            }
+            };
+
+            var mockShoppingCart = new Mock<IShoppingCart>();
+
+            // Setup the mocked ShoppingCart methods
+            mockShoppingCart.Setup(cart => cart.GetShoppingCartItems()).Returns(shoppingCartItems);
+            mockShoppingCart.Setup(cart => cart.GetShoppingCartTotal()).Returns(shoppingCartItems.Sum(item => item.Pie.Price * item.Amount));
+            mockShoppingCart.SetupProperty(cart => cart.ShoppingCartItems, shoppingCartItems);
+
+            return mockShoppingCart;
+        }
+
+        public static Mock<IOrderRepository> GetOrderRepository()
+        {
+            var mockOrderRepository = new Mock<IOrderRepository>();
+
+            // Setup CreateOrder to do nothing but allow verification
+            mockOrderRepository.Setup(repo => repo.CreateOrder(It.IsAny<Order>())).Verifiable();
+
+            return mockOrderRepository;
+        }
         public static Mock<IPieRepository> GetPieRepository()
         {
             var pies = new List<Pie>
